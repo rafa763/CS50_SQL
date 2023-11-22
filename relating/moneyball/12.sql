@@ -1,10 +1,20 @@
-/*
-SELECT "first_name", "last_name", ("salaries"."salary" / "H") AS "SH", ("salaries"."salary" / "RBI") AS "SRBI" FROM "players"
-JOIN "performances" ON "performances"."player_id" = "players"."id"
-JOIN "salaries" ON "salaries"."player_id" = "players"."id"
-WHERE "H" <> 0 AND "RBI" <> 0 AND "performances"."year" = 2001
-AND "performances"."year" = "salaries"."year"
-GROUP BY ("salaries"."salary" / "H") ,  ("salaries"."salary" / "RBI") 
-ORDER BY "players"."id"
-;
-*/
+SELECT "first_name", "last_name" FROM "players"
+WHERE "players"."id" IN (
+	SELECT "players"."id" FROM "players"
+	JOIN "salaries" ON "players"."id" = "salaries"."player_id"
+	JOIN "performances" ON "players"."id" = "performances"."player_id"
+	WHERE "salaries"."year" = '2001' AND "H" > 0
+	AND "performances"."year" = "salaries"."year"
+	ORDER BY ("salary" / "H"), "first_name", "last_name"
+	LIMIT 10
+)
+AND "players"."id" IN (
+	SELECT "players"."id" FROM "players"
+	JOIN "salaries" ON "players"."id" = "salaries"."player_id"
+	JOIN "performances" ON "players"."id" = "performances"."player_id"
+	WHERE "salaries"."year" = '2001' AND "RBI" > 0
+	AND "performances"."year" = "salaries"."year"
+	ORDER BY ("salary" / "RBI"), "first_name", "last_name"
+	LIMIT 10
+)
+ORDER BY "last_name";
